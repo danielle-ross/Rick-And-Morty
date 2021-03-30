@@ -1,0 +1,214 @@
+---
+title: "Data Science, Wubba Lubba Dub Dub!"
+author: "Danielle Ross"
+date: ""
+output: 
+  html_document:
+    code_folding: hide
+    theme: flatly
+    toc: true
+    toc_float: true
+    code_download: true
+---
+
+```{r, warning = FALSE, message = FALSE}
+# Load any R Packages you may need
+
+
+library(tidyverse)
+library(mortyr)
+library(mdsr)
+library(patchwork)
+library(viridis)
+library(ggpubr)
+library(scales)
+library(readxl)
+
+
+
+top250list <- read_csv("~/Desktop/STAT228/Project1/top250list.csv")
+charactersExcel <-read_excel("~/Desktop/STAT228/Project1/charactersExcel.xlsx") 
+Top15 <- read_csv("~/Desktop/STAT228/Project1/Top15.csv")
+RAM_FINAL<-read_csv("~/Desktop/STAT228/Project1/RAM_FINAL.csv")
+```
+
+```{r, warning = FALSE, message = FALSE}
+
+# Load any datasets you may need
+#view(RAM_FINAL)
+#view(charactersExcel)
+#view(all_ratings)
+#view(top15)
+#view(top250)
+```
+**General Project Information:**
+
+For this project I used a variety of packages and datasets. For packages, I used tidyverse, mortyr, ggplot2, mdsr, patchwork, viridis, ggpubr, knitr readxl, scales, and dplyr. For datasets, I used package that I found on github detailing the species, characters and other pertinent information relating to the characters, a few IMDB datasets (Top250, AllRatings) that I found on Github as well. I merged the two datasets together using inner_join and I edited the new dataset to only show the Top 15 rated shows of all time(Top15), and further edited it to only show the data relating to Rick and Morty (RAM_FINAL). 
+
+
+
+## **Not your average dark comedy, broh.**
+Life changes forever for the Smith family when sociopathic genius Rick Sanchez moves into his daughter's house and takes his grandson, Morty, on his intergalactic adventures. Masquerading as a dark comedy, this show is full of life lessons, tender moments and political undertones.
+
+## **What's good in the Multiverse?**
+**“When you know nothing matters, the universe is yours. And I’ve never met a universe that was into it.”**
+*-Rick Sanchez*
+
+**First things first, what is a Multiverse?**
+
+According to https://rickandmorty.fandom.com, "the Multiverse is a concept that refers to the existence of infinite universes that comprise everything that is. The entire series of Rick and Morty takes place inside the multiverse. One section of the multi-verse is the Central Finite Curve.
+The multiverse contains an infinite amount of versions of every character in the Rick and Morty series."
+
+### How many different species are there in the multiverse?
+
+With infinite realities and timelines, the sky is the limit! As we can see in this graphic, human and alien species exist predominately in the Multiverse, however, there are 12 overall species. 
+
+```{r, warning = FALSE, message = FALSE}
+
+charactersExcel <-read_excel("~/Desktop/STAT228/Project1/charactersExcel.xlsx") 
+charactersExcel %>%
+mutate(Species_lump = fct_lump(species, n= 12)) %>% 
+  filter(Species_lump != "Other") %>%
+  count(Species_lump) %>%
+ ggplot(aes(x = fct_reorder(Species_lump, n), y = n)) +
+  geom_col(color= "olivedrab1", fill="springgreen4") +
+  coord_flip() +
+ labs(x="Species", y="Number of Species", title= "Species in the Multiverse") 
+
+```
+
+**About this Graphic:**
+I chose to use a bar graph to display the data because it is catagorical data. Species was mapped to the X aesthetic, and I used different colors to keep up with the alien theme and geom_bar. I also flipped the X and Y axes because the species names were too long to fit on the X-axis. I finally added labels for the X and Y axes, and a title.
+
+### Gender equality is canon, Morty (buurp)
+
+Rick and Morty is filled with satire, and those who aren't well-versed in this concept may find some content deeply offensive. However, as you can see below, the characters are pretty evenly spread by gender, and there is even space for characters that fall outside of the gender binary!
+
+```{r, warning = FALSE, message = FALSE}
+
+ggplot(data=charactersExcel, aes(x=gender)) +
+  geom_bar(aes(fill=species), position= "fill") +
+  labs(x="", y="Proportion", title= "Gender by Species Distribution in the Multiverse" ) +
+  scale_fill_viridis(discrete = TRUE) +
+  theme(legend.position = "bottom") 
+  
+```
+
+**About this Graphic:**
+I decided to use a stacked bar chart here because I wanted to see the data of each gender/species side by side. I mapped gender to the X Axis (categorical), and filled the geom_bars with the species (categorical). On the Y axis is the proportion of species of each gender. I also used the viridis color palette because I thought it also kept with the alien vibe I was trying to go with. Since this is another set of categorical data, I chose to use the bar chart, and I wanted to use gender on the X axis because we are comparing gender between species here.I finally added labels for the X and Y axes, and a title. I also added a legend at the bottom so that the viewer can see what each color represents in the bars.
+
+## **How does Rick and Morty measure up to other shows?**
+**"I'm sorry, but your opinion means very little to me."**
+*-Rick Sanchez*
+
+Let's take a look at the ratings for this show, pulled from the IMDB database.As you can see, Rick and Morty is the 11th highest ranked show of all time (gasp) and is the Number 1 ranked animated show on IMDB, followed by Avatar the Last Airbender (yip yip!).  It's a good thing that Rick and Morty was just renewed for **7 more seasons**!
+
+```{r, warning = FALSE, message = FALSE}
+
+ggplot(top250list, aes(Rank, Rating))+
+  geom_line(aes(color = Rank)) +
+  scale_color_viridis(option = "D")+
+  theme_minimal() +
+  theme(legend.position = "bottom")+
+  geom_vline(xintercept = 11, col = "purple", linetype = "dashed", size = 0.8) + 
+  labs(x = "Rank", y = "IMDB Rating", 
+       title = "Distribution of IMBD Ratings Top 250 Shows", 
+       subtitle = "By rating and rank", 
+       caption = "Source: IMDB.com")+
+annotate("text", x = 50, y = 9.2, fontface = "italic", 
+           label = "Rick and Morty is HERE")
+```
+
+**About this Graphic:**
+For this visualization, I had a little more quantitative data to work with in this dataset, so I chose to go with a line graph (geom_line) and mapped the rank of the show to the X axis(quantitative) (compared to other shows in the Top 250 shows on IMDB) and overall rating of the show on IMDB on the Y axis (quantitative). I used viridis for aesthetic purposes and to show a range of values. I also included as legend to show the ranges within the ranks. I used geom_vline to map where Rick and Morty fell on the spectrum of TV shows and used the 'annotate' code to write what the line represented. I also used italic font purely for aesthetic purposes. Finally, I labeled all of my axes, added a title, subtitle and a source at the bottom.
+
+```{r, warning = FALSE, message = FALSE}
+
+ggplot(Top15, aes(Title, Rank)) + 
+  geom_point (aes(color = Rating, size=Rank)) + 
+   scale_color_viridis(option = "D")+
+ labs(x="Title", y="Rank", title= "Best Animated Show in the Multiverse...", subtitle = "And that's the waaaaay the news goes!" )+
+  theme_minimal() +
+  theme(legend.position = "bottom")+
+  coord_flip()
+```
+
+**About this Graphic:**
+For the graph below, I wanted to show the titles of the shows of the top 15 shows on IMDB. I edited the data set that I had on Excel and imported it (Top15). I decided to use a scatter plot here because I was working with one quantitative value and wanted to show it in this form. Title of the show was mapped to the X-axis, as this is categorical data, and rank was mapped to the Y-xis, as this is a quantitative variable. I once again used the pallette, viridis, for aesthetic purposes and i mapped the color variable to the rating of the show. There is a legend below detailing where the data points fall on the spectrum in regard to the rating. I also mapped the size of the points to the rank variable because I wanted it to be more aesthetically pleasing and easier to understand. (The points also kind of look like planets, and I thought that was pretty cool). I added a title so that the viewer understands the graph, and a subtitle that is one of Rick's catchphrases. Lastly, I flipped the X and Y axes because the titles of the shows were too long to put on the X axis.
+
+### **"SHOW ME WHAT YOU GOT"**
+*-Giant Head Cromulon*
+
+You are probably asking yourself, "How do I begin? Where do I start?" Obviously, you start from the beginning to watch all of the amazing character and series arcs and understand all of the running jokes (duh). Buuuuut, if you love to watch the world burn, you can start with the highest ranked episodes, I guess.
+
+```{r, warning = FALSE, message = FALSE}
+
+
+ggplot(RAM_FINAL, aes(Total_Episode_Count, Rating)) + 
+  geom_col(aes(color = Episode_Name)) + 
+  scale_fill_viridis(option = "D")+
+   geom_text(aes(label = Total_Episode_Count), vjust = -.5)+
+  labs(x = "Episode Number", y = "IMDB Rating", title = "Best Rick and Morty Episodes", subtitle = "By IMDB Rating", 
+       caption = "Source: IMDB.com") +
+  theme_bw() +
+  theme(legend.position = "")
+```
+
+**About this Graphic:**
+I decided to use a column chart to showcase the data. I mapped the total episode count, from 1-40, on the X axis, as this is technically quantitative data, but for these purposes, it was more categorical, as the number itself is more of an arbitrary numbering system, as opposed to an actual value that holds weight in a ranking system. I mapped the IMBD ratings of each episode on the Y axis because this is purely quantitative. Once again, I used virdis because I like the way that the colors look on the page and they fit the theme, in my opinion. I mapped the individual episodes to the color aesthetic as well, so that they would all be a different color. I used the geom_text function to label the columns to make them easier to read and mapped the episode count to the labels. I finally added labels for the X and Y axes, a title, subtitle and a source to the bottom. I also omitted the legend because it cluttered the graphic and was not important for understanding it.
+
+### "Nine seasons, Morty! Nine more seasons until I get that dipping Szechuan sauce. And 97 more years, Morty!"
+*-Rick Sachez*
+
+Okay, so that last graph was a lot to process, and that's my bad. Here is a breakdown of the best episodes by season.
+
+```{r, warning = FALSE, message = FALSE}
+ggplot(RAM_FINAL, aes(Episode, Rating)) + 
+  geom_col(aes(color = Episode_Name)) + 
+  scale_fill_viridis(option = "D")+
+   geom_text(aes(label = Episode), vjust = 2, color="white")+
+  labs(x = "Episode Number", y = "IMDB Rating", title = "Best Rick and Morty Episodes", subtitle = "By Season", 
+       caption = "Source: IMDB.com") +
+  facet_wrap(~Season)+
+  theme_bw() +
+  theme(legend.position = "")
+```
+
+**About this Graphic:**
+I added this extra graphic because the last one was a bit crowded, but I liked it because it showed the consistency in ratings of episodes across the seasons. Below, I broke down the episodes by season to make it a bit easier to pick out which individual episodes are best in the season, according to IMDB. I desided to use another column chart for consistency and ebcause I felt it was the best way to display the data. I mapped the episode number to the X axis, as it is once again, categorical, and the rating to the Y axis because it is quantitative. I also mapped the episode name to the color aesthetic, for no reason other than the fact that it looked nice and I used viridis to keep with the theme. I labeled the columns again for aesthetic purposes and mapped the episode number variable to the labels. I mapped the season variable to the facet_wrap function because I wanted a breakdown by season and this was the best way to display that data. Finally, I added X and Y labels, a title, subtitle and a source at the bottom. I also omitted the legend because it was unnecessary and cluttered the graphic.
+
+### "I don't respect time travel. If Ant-Man and the Wasp can do it, I'm not Interested."
+*-Rick Sanchez*
+
+So now that we know which episodes are the best of which seasons, let's see how how ratings and viewership has changed over time. As you can see below, the decline in the number of viewers doesn't really have that much of a negative affect on the individual episode ratings, however, episode 4 did contain the lowest rated episode in Rick and Morty history and it appears that viewership stayed down after that episode. Tbh, I thought the episode in question ("Claw and Hoarder: Special Ricktim's Morty": Rating 7.4) was hilarious, but people probably thought it was kind of weird (welcome to my brain). Also, episode 7 in season 3 (The Ricklantis Mixup) was rated as the highest ranked episode on IMDB, but I honestly thought it was not one of the best (read: very forgettable), and if someone asked me to rank my top 10, that episode wouldn't even come to mind.I rewatched it yesterday, just to be sure, and I stand by that assessment.
+
+```{r, warning = FALSE, message = FALSE}
+ggplot(RAM_FINAL,aes(Total_Episode_Count,Rating)) + 
+  geom_line(aes(color = Total_Episode_Count))+
+  scale_color_viridis(option = "D")+
+labs(x = "Episode Number", y = "IMDB Rating", title = "Rick and Morty", subtitle = "Ratings over four seasons", 
+       caption = "Source: IMDB.com") +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+**About this Graphic:**
+I added this graphic to show how the ratings of episodes has changed over time. I used a line graph because I felt it was the best and most aesthetically pleasing way to display the data. I mapped the episode number to the X axis(quantitative/categorical), and the IMDB rating to to Y axis (quantitative). I mapped the episode number to the color aesthetic, using viridis palette, because I thought it looked nice and was on brand. inally, I added X and Y labels, a title, subtitle and a source at the bottom and omitted the legend because it was unnecessary and cluttered the graphic.
+
+```{r, warning = FALSE, message = FALSE}
+ggplot(RAM_FINAL, aes(Total_Episode_Count, Viewers))+
+  geom_point(aes(color = Season, size= Viewers)) +
+  scale_color_viridis(option = "D")+
+  theme_minimal() +
+  labs(x = "Episode Number", y = "U.S. Viewers (millions)",color = "Season"
+, size = "Viewership size in millions", title = "Rick and Morty", subtitle = "Viewership over time", 
+       caption = "Source: https://en.wikipedia.org/wiki/List_of_Rick_and_Morty_episodes") +
+  theme(legend.position = "bottom")
+```
+
+**About this Graphic:**
+I added the graphic below because I wanted to see if there was a relationship between IMDB ratings and viewership. I mapped the episode variable to the X axis (categorical/quantitative) and the viewership variable to the Y axis (quantitative). I mapped the color aesthetic to the season variable with viridis so that it broke the dots on the scatter plot up by seasons. I chose a scatter plot because I liked the trend it shows while also showing each episode as its own piece of data. I mapped the viewership variable to the size aesthetic because I thought that it was a good representation of how many viewers were watching. Finally, I added X and Y labels, a title, subtitle and a source at the bottom. I also put the legend at the bottom because it looked nice. 
+
+
+## "Is evil real, and if so, can it be measured? Rhetorical question. The answer's yes, you just have to be a genius."
+*-Rick Sanchez*
